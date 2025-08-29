@@ -7,8 +7,7 @@
 
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
-    id 'application'
-    id 'org.openjfx.javafxplugin' version '0.1.0'
+    application
 }
 
 repositories {
@@ -18,12 +17,12 @@ repositories {
 
 dependencies {
     // Use JUnit Jupiter for testing.
-    testImplementation libs.junit.jupiter
+    testImplementation(libs.junit.jupiter)
 
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // This dependency is used by the application.
-    implementation libs.guava
+    implementation(libs.guava)
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -35,15 +34,12 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = 'hello.App'
+    mainClass = "App"
 }
 
-tasks.named('test') {
+tasks.named<Test>("test") {
     // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
 
-javafx {
-    version = "21.0.8"
-    modules = [ 'javafx.controls' ]
-}
+

@@ -4,6 +4,9 @@
 package hello;
 
 import org.junit.jupiter.api.Test;
+
+import jk.App;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class AppTest {
