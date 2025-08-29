@@ -8,43 +8,98 @@
 // import javafx.scene.layout.StackPane;
 // import javafx.stage.Stage;
 
-import javafx.animation.Interpolator;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
+// import javafx.animation.Interpolator;
+// import javafx.animation.KeyFrame;
+// import javafx.animation.KeyValue;
+// import javafx.animation.Timeline;
+// import javafx.application.Application;
+// import javafx.scene.paint.Color;
+// import javafx.scene.shape.Circle;
+
+import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.scene.Group;
+import javafx.scene.Scene;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
+
 /**
- * <p><img src="https://zone01oujda.ma/_next/image?url=%2Flogolight.png&w=640&q=75" alt="A black circle in the top left
- * corner of scene"></p>
+ * <p>
+ * <img src="https://zone01oujda.ma/_next/image?url=%2Flogolight.png&w=640&q=75"
+ * alt="A black circle in the top left
+ * corner of scene">
+ * </p>
  *
  * @see Platform
  *
  * @since JavaFX 2.0
  */
-import javafx.stage.Stage;
-import javafx.util.Duration;
+// import javafx.stage.Stage;
+// import javafx.util.Duration;
 
 public class App extends Application {
+
+    private long currentTime;
+    private static final double WINDOW_WIDTH = 800;
+    private static final double WINDOW_HEIGHT = 800;
+    private static final double BALL_RADIUS = 20;
+    private static final double SPEED = 0.1;
 
     @Override
     public void start(Stage stage) throws Exception {
         // TODO Auto-generated method stub
-        Circle circle = new Circle(50, 150, 10, Color.GREEN);
 
-        KeyValue x = new KeyValue(circle.translateXProperty(), 200, Interpolator.DISCRETE);
-        KeyFrame frame = new KeyFrame(Duration.seconds(5), x);
-        Timeline timeline = new Timeline(frame);
+        double[] velocity = new double[] { SPEED, SPEED };
 
-        timeline.play();
+        // primaryStage.setTitle("My JavaFX Application");
+        // primaryStage.setScene(scene);
 
+        Line line = new Line(0, 400, 800, 400);
+        Pane pane = new Pane(line);
+
+        Circle ball = new Circle(BALL_RADIUS, Color.RED);
+        ball.setCenterX(WINDOW_WIDTH / 2);
+        ball.setCenterY(WINDOW_HEIGHT / 2);
+        pane.getChildren().add(ball);
+        
+
+        AnimationTimer timer = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                // TODO Auto-generated method stub
+                // ball.setCenterX(ball.getCenterX() + velocity[0]);
+                // ball.setCenterY(ball.getCenterY() + velocity[1]);
+
+                // // Check for collision with window boundaries
+                // if (ball.getCenterX() <= BALL_RADIUS ||
+                //         ball.getCenterX() >= WINDOW_WIDTH - BALL_RADIUS) {
+                //     velocity[0] = -velocity[0]; // Reverse x direction
+                // }
+                // if (ball.getCenterY() <= BALL_RADIUS ||
+                //         ball.getCenterY() >= WINDOW_HEIGHT - BALL_RADIUS) {
+                //     velocity[1] = -velocity[1]; // Reverse y direction
+                // }
+            }
+        };
+
+        stage.centerOnScreen();
+        Scene scene = new Scene(pane, WINDOW_WIDTH, WINDOW_HEIGHT);
+        stage.setTitle("Bouncing Ball Animation");
+        stage.setScene(scene);
+        stage.show();
+
+        timer.start();
     }
 
     public static void main(String[] args) {
-        launch();
-        // Application
         System.out.println("Hello world");
+        launch();
     }
 
 }
