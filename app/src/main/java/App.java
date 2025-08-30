@@ -4,16 +4,17 @@
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
-import javafx.scene.control.ListCell;
-import javafx.scene.effect.Light.Point;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
@@ -42,9 +43,10 @@ public class App extends Application {
     private static final double BALL_RADIUS = 20;
     private static final double SPEED = 0.1;
     private static final double CAR_WIDTH = 40;
-    private static final double SAFETY_gap = 10;
+    private static final double SAFETY_GAP = 10;
     private List<Car> cars = new ArrayList<>();
     private Map<KeyCode, Integer> lengthCars = new HashMap<>();
+    private Map<KeyCode, Car> lastCarXandY = new HashMap<>();
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -81,47 +83,32 @@ public class App extends Application {
         ball.setCenterY(WINDOW_HEIGHT / 2);
         pane.getChildren().add(ball);
 
-        // Car car = new Car(Color.RED);
-        // pane.getChildren().addAll(car);
-
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                // ball.setCenterX(ball.getCenterX() + velocity[0]);
-                // ball.setCenterY(ball.getCenterY() + velocity[1]);
-
-                // // Check for collision with window boundaries
-                // if (ball.getCenterX() <= BALL_RADIUS ||
-                // ball.getCenterX() >= WINDOW_WIDTH - BALL_RADIUS) {
-                // velocity[0] = -velocity[0]; // Reverse x direction
-                // }
-                // if (ball.getCenterY() <= BALL_RADIUS ||
-                // ball.getCenterY() >= WINDOW_HEIGHT - BALL_RADIUS) {
-                // velocity[1] = -velocity[1]; // Reverse y direction
-                // }
-
+    
                 double speed = 0.1;
 
-                for (Car car : cars) {
+                Iterator<Car> iterator = cars.iterator();
+                while (iterator.hasNext()) {
+                    Car car = iterator.next();
+                    // change direction
+
+
+
+                    // 
                     switch (car.direction) {
-                        case UP -> {
-                            car.setY(car.getY() - speed);
-                        }
-                        case DOWN -> {
-                            car.setY(car.getY() + speed);
-                        }
-                        case LEFT -> {
-                            car.setX(car.getX() - speed);
-                        }
-                        case RIGHT -> {
-                            car.setX(car.getX() + speed);
-                        }
+                        case UP -> car.setY(car.getY() - speed);
+                        case DOWN -> car.setY(car.getY() + speed);
+                        case LEFT -> car.setX(car.getX() - speed);
+                        case RIGHT -> car.setX(car.getX() + speed);
                         default -> {
                         }
                     }
 
-                    if (car.getX() > WINDOW_WIDTH || car.getY() > WINDOW_HEIGHT) {
-                        cars.remove(car);
+                    if (car.getX() > WINDOW_WIDTH || car.getY() > WINDOW_HEIGHT || car.getX() < -41
+                            || car.getY() < -41) {
+                        iterator.remove();
                         pane.getChildren().remove(car);
                         lengthCars.put(car.direction, lengthCars.get(car.direction) - 1);
                     }
@@ -136,21 +123,26 @@ public class App extends Application {
 
         // keys
         scene.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
-            System.out.println("Key pressed (filtered): " + event.getCode());
             KeyCode key = event.getCode();
             switch (key) {
                 case UP, DOWN, LEFT, RIGHT -> {
                     // capacity = floor(lane_length / (vehicle_length + safety_gap))
-                    double capacity = Math.floor(WINDOW_WIDTH / (CAR_WIDTH + SAFETY_gap));
+                    double capacity = Math.floor(WINDOW_WIDTH / (CAR_WIDTH + SAFETY_GAP));
                     if (lengthCars.getOrDefault(key, 0) < capacity) {
                         Point2D pos = positions.get(key);
-                        Car car = new Car(Color.YELLOW, key);
-                        car.setX(pos.getX());
-                        car.setY(pos.getY());
-                        pane.getChildren().add(car);
-                        lengthCars.put(key, lengthCars.getOrDefault(key, 0) + 1);
-                        System.out.println(lengthCars);
-                        cars.add(car);
+                        Car lastCar = lastCarXandY.get(key);
+                        if (lastCar == null
+                                || lastCar.distance(pos.getX(), pos.getY()) >= SAFETY_GAP + lastCar.getWidth()) {
+                            Car car = new Car(randomColor(), key);
+                            car.setX(pos.getX());
+                            car.setY(pos.getY());
+                            pane.getChildren().add(car);
+                            lengthCars.put(key, lengthCars.getOrDefault(key, 0) + 1);
+                            lastCarXandY.put(key, car);
+                            cars.add(car);
+                            System.out.println(cars.size() + " => " + lengthCars.get(key));
+                        }
+
                     }
                 }
                 // case UP -> {
@@ -198,6 +190,14 @@ public class App extends Application {
         stage.show();
 
         timer.start();
+    }
+
+    public Color randomColor() {
+        return new Color[] {
+                Color.YELLOW,
+                Color.PURPLE,
+                Color.BLUE,
+        }[ThreadLocalRandom.current().nextInt(3)];
     }
 
     public static void main(String[] args) {

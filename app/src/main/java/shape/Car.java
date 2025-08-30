@@ -1,6 +1,7 @@
 package shape;
 
 import java.awt.event.KeyEvent;
+import java.awt.geom.Point2D;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
@@ -17,5 +18,9 @@ public class Car extends Rectangle {
         super(0, 0, WIDTH, HEIGTH);
         this.direction = direction;
         setFill(color);
+    }
+
+    public double distance(double x, double y) {
+        return Point2D.distance(this.getX(), this.getY(), x, y);  
     }
 }
