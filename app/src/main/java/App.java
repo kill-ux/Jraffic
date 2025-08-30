@@ -149,34 +149,6 @@ public class App extends Application {
 
                     }
                 }
-                // case UP -> {
-                // Car car = new Car(Color.YELLOW, event.getCode());
-                // car.setX(South.getX());
-                // car.setY(South.getY());
-                // pane.getChildren().add(car);
-                // cars.add(car);
-                // }
-                // case DOWN -> {
-                // Car car = new Car(Color.YELLOW, event.getCode());
-                // car.setX(North.getX() - 40);
-                // car.setY(North.getY() - 40);
-                // pane.getChildren().add(car);
-                // cars.add(car);
-                // }
-                // case LEFT -> {
-                // Car car = new Car(Color.YELLOW, event.getCode());
-                // car.setX(East.getX());
-                // car.setY(East.getY() - 40);
-                // pane.getChildren().add(car);
-                // cars.add(car);
-                // }
-                // case RIGHT -> {
-                // Car car = new Car(Color.YELLOW, event.getCode());
-                // car.setX(West.getX() - 40 );
-                // car.setY(West.getY());
-                // pane.getChildren().add(car);
-                // cars.add(car);
-                // }
                 case R -> {
 
                 }
