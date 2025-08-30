@@ -120,6 +120,11 @@ public class App extends Application {
                         }
                     }
 
+                    if (car.getX() > WINDOW_WIDTH || car.getY() > WINDOW_HEIGHT) {
+                        cars.remove(car);
+                        pane.getChildren().remove(car);
+                        lengthCars.put(car.direction, lengthCars.get(car.direction) - 1);
+                    }
                 }
 
             }
@@ -137,8 +142,7 @@ public class App extends Application {
                 case UP, DOWN, LEFT, RIGHT -> {
                     // capacity = floor(lane_length / (vehicle_length + safety_gap))
                     double capacity = Math.floor(WINDOW_WIDTH / (CAR_WIDTH + SAFETY_gap));
-                    
-                    if (lengthCars.getOrDefault(key,0) < capacity / 2) {
+                    if (lengthCars.getOrDefault(key, 0) < capacity) {
                         Point2D pos = positions.get(key);
                         Car car = new Car(Color.YELLOW, key);
                         car.setX(pos.getX());
