@@ -94,7 +94,7 @@ public class App extends Application {
                     Car car = iterator.next();
                     // change direction
 
-
+                    
 
                     // 
                     switch (car.direction) {
