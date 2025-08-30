@@ -19,6 +19,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
@@ -40,6 +41,7 @@ public class App extends Application {
     private long currentTime;
     private static final double WINDOW_WIDTH = 800;
     private static final double WINDOW_HEIGHT = 800;
+    private static final double CENTER = 400;
     private static final double BALL_RADIUS = 20;
     private static final double SPEED = 0.1;
     private static final double CAR_WIDTH = 40;
@@ -86,19 +88,22 @@ public class App extends Application {
         AnimationTimer timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-    
+
                 double speed = 0.1;
 
                 Iterator<Car> iterator = cars.iterator();
                 while (iterator.hasNext()) {
                     Car car = iterator.next();
                     // change direction
+                    if (car.changed == false) {
+                        Rotate(car);
+                    }
 
-                    
-
-                    // 
+                    //
                     switch (car.direction) {
-                        case UP -> car.setY(car.getY() - speed);
+                        case UP -> {
+                            car.setY(car.getY() - speed);
+                        }
                         case DOWN -> car.setY(car.getY() + speed);
                         case LEFT -> car.setX(car.getX() - speed);
                         case RIGHT -> car.setX(car.getX() + speed);
@@ -110,7 +115,7 @@ public class App extends Application {
                             || car.getY() < -41) {
                         iterator.remove();
                         pane.getChildren().remove(car);
-                        lengthCars.put(car.direction, lengthCars.get(car.direction) - 1);
+                        lengthCars.put(car.direction, lengthCars.getOrDefault(car.direction, 0) - 1);
                     }
                 }
 
@@ -140,7 +145,6 @@ public class App extends Application {
                             lengthCars.put(key, lengthCars.getOrDefault(key, 0) + 1);
                             lastCarXandY.put(key, car);
                             cars.add(car);
-                            System.out.println(cars.size() + " => " + lengthCars.get(key));
                         }
 
                     }
@@ -200,8 +204,72 @@ public class App extends Application {
         }[ThreadLocalRandom.current().nextInt(3)];
     }
 
+    public void Rotate(Car car) {
+        switch (car.direction) {
+            case UP -> {
+                if (car.getFill().equals(Color.YELLOW)) {
+                    if (car.getY() <= CENTER) {
+                        changeLength(car, KeyCode.RIGHT);
+                        car.setDirection(KeyCode.RIGHT);
+                    }
+                } else if (car.getFill().equals(Color.PURPLE)) {
+                    if (car.getY() <= CENTER - 40) {
+                        changeLength(car, KeyCode.LEFT);
+                        car.setDirection(KeyCode.LEFT);;
+                    }
+                }
+            }
+            case DOWN -> {
+                if (car.getFill().equals(Color.YELLOW)) {
+                    if (car.getY() >= CENTER - 40) {
+                        changeLength(car, KeyCode.LEFT);
+                        car.setDirection(KeyCode.LEFT);
+                    }
+                } else if (car.getFill().equals(Color.PURPLE)) {
+                    if (car.getY() >= CENTER) {
+                        changeLength(car, KeyCode.RIGHT);
+                        car.setDirection(KeyCode.RIGHT);
+                    }
+                }
+            }
+            case LEFT -> {
+                if (car.getFill().equals(Color.YELLOW)) {
+                    if (car.getX() <= CENTER) {
+                        changeLength(car, KeyCode.UP);
+                        car.setDirection(KeyCode.UP);
+                    }
+                } else if (car.getFill().equals(Color.PURPLE)) {
+                    if (car.getX() <= CENTER - 40) {
+                        changeLength(car, KeyCode.DOWN);
+                        car.setDirection(KeyCode.DOWN);
+                    }
+                }
+            }
+            case RIGHT -> {
+                 if (car.getFill().equals(Color.YELLOW)) {
+                    if (car.getX() >= CENTER - 40) {
+                        changeLength(car, KeyCode.DOWN);
+                        car.setDirection(KeyCode.DOWN);
+                    }
+                } else if (car.getFill().equals(Color.PURPLE)) {
+                    if (car.getX() >= CENTER) {
+                        changeLength(car, KeyCode.UP);
+                        car.setDirection(KeyCode.UP);
+                    }
+                }
+            }
+            default -> {
+            }
+        }
+
+    }
+
+    public void changeLength(Car car, KeyCode key) {
+        lengthCars.put(car.direction, lengthCars.getOrDefault(car.direction, 0) - 1);
+        lengthCars.put(key, lengthCars.getOrDefault(key, 0) + 1);
+    }
+
     public static void main(String[] args) {
-        System.out.println("Hello world");
         launch();
     }
 
