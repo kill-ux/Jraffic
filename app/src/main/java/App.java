@@ -47,7 +47,7 @@ public class App extends Application {
 
         Line[] lines = new Line[] {
                 new Line(left.getX(), left.getY(), rigth.getX(), rigth.getY()),
-                new Line(left.getX(), left.getY(), rigth.getX(), rigth.getY()),
+                new Line(top.getX(), top.getY(), botoom.getX(), botoom.getY()),
         };
 
         Pane pane = new Pane();
