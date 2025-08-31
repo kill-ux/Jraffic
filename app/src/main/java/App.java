@@ -367,7 +367,7 @@ public class App extends Application {
     }
 
     // Helper method
-    private boolean isSafeDistance(Car currentCar, List<Car> cars, double x, double y) {
+    private boolean isSafeDistance(Car currentCar, List<Car> cars, double x,double y) {
         for (Car other : cars) {
             if (other == currentCar)
                 continue;
