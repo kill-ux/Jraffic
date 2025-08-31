@@ -132,7 +132,7 @@ public class App extends Application {
             // Adjust duration proportional to number of cars
             int queueSize = maxEntry.get().getValue().size();
             // e.g. base 3 seconds + 1 second per car
-            greenDuration = (3 + queueSize) * 1_000_000_000L;
+            greenDuration = (1 + queueSize) * 1_000_000_000L;
             // Reset timer
             lastLightChangeTime = now;
         }
@@ -175,7 +175,8 @@ public class App extends Application {
 
                 // Car can move if: already passed OR (not red light OR not near intersection)
                 if (hasPassed || !isRedLight || !isNearIntersection) {
-                    if (hasPassed || isSafeDistance(car, lengthCars.get(car.direction))) {
+                    if (hasPassed
+                            || isSafeDistance(car, lengthCars.get(car.direction), car.getX(), car.getY() - SPEED)) {
                         car.setY(car.getY() - SPEED);
                         if (isNearIntersection && !hasPassed) {
                             car.setPassed();
@@ -193,7 +194,8 @@ public class App extends Application {
                 boolean hasPassed = car.getPassed();
 
                 if (hasPassed || !isRedLight || !isNearIntersection) {
-                    if (hasPassed || isSafeDistance(car, lengthCars.get(car.direction))) {
+                    if (hasPassed
+                            || isSafeDistance(car, lengthCars.get(car.direction), car.getX(), car.getY() + SPEED)) {
                         car.setY(car.getY() + SPEED);
                         if (isNearIntersection && !hasPassed) {
                             car.setPassed();
@@ -211,7 +213,8 @@ public class App extends Application {
                 boolean hasPassed = car.getPassed();
 
                 if (hasPassed || !isRedLight || !isNearIntersection) {
-                    if (hasPassed || isSafeDistance(car, lengthCars.get(car.direction))) {
+                    if (hasPassed
+                            || isSafeDistance(car, lengthCars.get(car.direction), car.getX() - SPEED, car.getY())) {
                         car.setX(car.getX() - SPEED);
                         if (isNearIntersection && !hasPassed) {
                             car.setPassed();
@@ -229,7 +232,8 @@ public class App extends Application {
                 boolean hasPassed = car.getPassed();
 
                 if (hasPassed || !isRedLight || !isNearIntersection) {
-                    if (hasPassed || isSafeDistance(car, lengthCars.get(car.direction))) {
+                    if (hasPassed
+                            || isSafeDistance(car, lengthCars.get(car.direction), car.getX() + SPEED, car.getY())) {
                         car.setX(car.getX() + SPEED);
                         if (isNearIntersection && !hasPassed) {
                             car.setPassed();
@@ -363,42 +367,41 @@ public class App extends Application {
     }
 
     // Helper method
-    private boolean isSafeDistance(Car currentCar, List<Car> cars) {
+    private boolean isSafeDistance(Car currentCar, List<Car> cars, double x, double y) {
         for (Car other : cars) {
             if (other == currentCar)
                 continue;
 
             switch (currentCar.direction) {
                 case UP -> {
-                    if (Math.abs(currentCar.getX() - other.getX()) < Car.WIDTH / 2) {
-                        // Only block if the other car is AHEAD (smaller Y)
-                        if (other.getY() < currentCar.getY() &&
-                                currentCar.getY() - other.getY() < SAFETY_GAP + Car.HEIGHT) {
+                    if (Math.abs(x - other.getX()) < Car.WIDTH / 2) {
+                        // Check if other car is ahead (has smaller Y) and too close
+                        if (other.getY() < y && y - other.getY() < SAFETY_GAP + Car.HEIGHT) {
                             return false;
                         }
                     }
                 }
                 case DOWN -> {
-                    if (Math.abs(currentCar.getX() - other.getX()) < Car.WIDTH / 2) {
-                        // Only block if the other car is AHEAD (larger Y)
-                        if (other.getY() > currentCar.getY() &&
-                                other.getY() - currentCar.getY() < SAFETY_GAP + Car.HEIGHT) {
+                    if (Math.abs(x - other.getX()) < Car.WIDTH / 2) {
+                        // Check if other car is ahead (has larger Y) and too close
+                        if (other.getY() > y && other.getY() - y < SAFETY_GAP + Car.HEIGHT) {
                             return false;
                         }
                     }
                 }
                 case LEFT -> {
-                    if (Math.abs(currentCar.getY() - other.getY()) < Car.HEIGHT / 2) {
-                        if (other.getX() < currentCar.getX() &&
-                                currentCar.getX() - other.getX() < SAFETY_GAP + Car.WIDTH) {
+                    if (Math.abs(y - other.getY()) < Car.HEIGHT / 2) {
+                        // Check if other car is ahead (has smaller X) and too close
+                        if (other.getX() < x && x - other.getX() < SAFETY_GAP + Car.WIDTH) {
+                            System.out.println("ffffffffffffffffff");
                             return false;
                         }
                     }
                 }
                 case RIGHT -> {
-                    if (Math.abs(currentCar.getY() - other.getY()) < Car.HEIGHT / 2) {
-                        if (other.getX() > currentCar.getX() &&
-                                other.getX() - currentCar.getX() < SAFETY_GAP + Car.WIDTH) {
+                    if (Math.abs(y - other.getY()) < Car.HEIGHT / 2) {
+                        // Check if other car is ahead (has larger X) and too close
+                        if (other.getX() > x && other.getX() - x < SAFETY_GAP + Car.WIDTH) {
                             return false;
                         }
                     }
