@@ -120,7 +120,7 @@ public class App extends Application {
         // // If current green road is empty, don't switch lights
 
         // If still within current green duration, do nothing
-        if (now - lastLightChangeTime < greenDuration) {
+        if (now - lastLightChangeTime < greenDuration && !checkIfIntersectionIsEmty()) {
             return;
         }
         // Find the road with the max queue
@@ -141,6 +141,19 @@ public class App extends Application {
             // Reset timer
             lastLightChangeTime = now;
         }
+    }
+
+    private boolean checkIfIntersectionIsEmty() {
+        Point2D center1 = new Point2D(CENTER, CENTER);
+        for (Car car : cars) {
+            Point2D center2 = new Point2D(car.getX() + car.getWidth() / 2, car.getY() + car.getWidth() / 2);
+            double dis = center1.distance(center2);
+            System.out.println(dis);
+            if (dis < 63.245) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // Helper method to get direction from light
