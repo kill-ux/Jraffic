@@ -302,7 +302,6 @@ public class App extends Application {
         stage.centerOnScreen();
         stage.show();
         stage.setResizable(false);
-
         timer.start();
     }
 
