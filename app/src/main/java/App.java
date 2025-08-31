@@ -46,8 +46,9 @@ public class App extends Application {
                 KeyCode.LEFT, new Point2D(East.getX(), CENTER - CAR_WIDTH),
                 KeyCode.RIGHT, new Point2D(-CAR_WIDTH, CENTER));
 
-        lights.addAll(List.of(new Light(KeyCode.UP), new Light(KeyCode.DOWN), new Light(KeyCode.LEFT),
-                new Light(KeyCode.RIGHT)));
+        lights.addAll(List.of(new Light(CENTER - 80, CENTER - 80), new Light(CENTER + 40, CENTER - 80),
+                new Light(CENTER + 40, CENTER + 40),
+                new Light(CENTER - 80, CENTER + 40)));
 
         Pane pane = createRoadLines(North, South, East, West);
         pane.getChildren().addAll(lights);
@@ -103,7 +104,18 @@ public class App extends Application {
 
     private void moveCar(Car car) {
         switch (car.direction) {
-            case UP -> car.setY(car.getY() - SPEED);
+            case UP -> {
+                // verfiy ligths
+                Light light = lights.get(2);
+                Car lastCar = lastCarXandY.get(car.direction);
+                // if (!(light.getStroke().equals(Color.RED) && (light.getY() >= car.getY()))) {
+                //     if (!lastCar.equals(car) || lastCar.distance(car.getX(), car.getY()) >= SAFETY_GAP + CAR_WIDTH) {
+                        
+                //     }
+                    car.setY(car.getY() - SPEED);
+                // }
+
+            }
             case DOWN -> car.setY(car.getY() + SPEED);
             case LEFT -> car.setX(car.getX() - SPEED);
             case RIGHT -> car.setX(car.getX() + SPEED);
