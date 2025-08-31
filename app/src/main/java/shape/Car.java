@@ -11,11 +11,13 @@ public class Car extends Rectangle {
 
     public KeyCode direction;
     public boolean changed;
+    public boolean passed;
 
     public Car(Color color, KeyCode direction) {
         super(0, 0, WIDTH, HEIGHT);
         this.direction = direction;
         this.changed = false;
+        this.passed = false;
         setFill(color);
     }
 
@@ -28,5 +30,17 @@ public class Car extends Rectangle {
     public void setDirection(KeyCode direction) {
         this.direction = direction;
         this.changed = true;
+    }
+
+    public boolean getPassed() {
+        return this.passed;
+    }
+    
+    public void setPassed(){
+        this.passed = true;
+    }
+
+    public boolean hasChangedDirection() {
+        return this.changed;
     }
 }
