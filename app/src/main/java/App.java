@@ -30,7 +30,7 @@ public class App extends Application {
     private static final double SAFETY_GAP = 40;
     private static final double SPEED = 0.25;
     private long lastLightChangeTime = 0;
-    private long greenDuration = 3_000_000_000L; // default 3 seconds in nanoseconds
+    private long greenDuration = 1_000_000_000L; // default 3 seconds in nanoseconds
 
     private final List<Car> cars = new ArrayList<>();
     private final Map<KeyCode, List<Car>> lengthCars = new EnumMap<>(KeyCode.class);
@@ -117,15 +117,16 @@ public class App extends Application {
         KeyCode currentGreenDirection = getDirectionFromLight(lastGreen);
         List<Car> currentRoadCars = lengthCars.get(currentGreenDirection);
 
-        // // If current green road is empty, don't switch lights
-
         // If still within current green duration, do nothing
-        if (now - lastLightChangeTime < greenDuration && !checkIfIntersectionIsEmty()) {
+        if (now - lastLightChangeTime < greenDuration && checkIfIntersectionIsFill()) {
             return;
         }
         // Find the road with the max queue
+
         Optional<Entry<KeyCode, List<Car>>> maxEntry = lengthCars.entrySet()
                 .stream()
+                // Skip the current green direction
+                .filter(e -> !getDirectionFromLight(lastGreen).equals(e.getKey()))
                 .max(Comparator.comparingInt(e -> e.getValue().size()));
 
         if (maxEntry.isPresent()) {
@@ -143,17 +144,19 @@ public class App extends Application {
         }
     }
 
-    private boolean checkIfIntersectionIsEmty() {
+    private boolean checkIfIntersectionIsFill() {
         Point2D center1 = new Point2D(CENTER, CENTER);
         for (Car car : cars) {
             Point2D center2 = new Point2D(car.getX() + car.getWidth() / 2, car.getY() + car.getWidth() / 2);
             double dis = center1.distance(center2);
-            System.out.println(dis);
             if (dis < 63.245) {
-                return false;
+                return true;
             }
         }
-        return true;
+        if (cars.size() == 0) {
+            return true;
+        }
+        return false;
     }
 
     // Helper method to get direction from light
@@ -184,6 +187,10 @@ public class App extends Application {
         }
     }
 
+    private void exit() {
+        System.exit(0);
+    }
+
     private void removeFromLine(Car car) {
         Point2D center1 = new Point2D(CENTER, CENTER);
         Point2D center2 = new Point2D(car.getX() + car.getWidth() / 2, car.getY() + car.getWidth() / 2);
@@ -191,7 +198,6 @@ public class App extends Application {
         if (dis < 63.245) {
             List<Car> list = lengthCars.get(car.direction);
             list.remove(car);
-            // System.out.println(a);
         }
     }
 
@@ -304,6 +310,11 @@ public class App extends Application {
             KeyCode key = event.getCode();
             if (positions.containsKey(key)) {
                 addCarIfPossible(pane, key, positions.get(key));
+            } else if (key == KeyCode.R) {
+                KeyCode randomKey = getRandomKey();
+                addCarIfPossible(pane, randomKey, positions.get(randomKey));
+            } else if (key == KeyCode.ESCAPE) {
+                exit();
             }
         });
     }
@@ -333,6 +344,12 @@ public class App extends Application {
 
     private Color getRandomColor() {
         return carColors[ThreadLocalRandom.current().nextInt(carColors.length)];
+    }
+
+    private KeyCode getRandomKey() {
+        List<KeyCode> keys = new ArrayList<>(lengthCars.keySet());
+        int randomIndex = ThreadLocalRandom.current().nextInt(keys.size());
+        return keys.get(randomIndex);
     }
 
     private void rotateCar(Car car) {
