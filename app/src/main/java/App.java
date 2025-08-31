@@ -130,6 +130,20 @@ public class App extends Application {
             if (isCarOutOfBounds(car)) {
                 removeCar(pane, iterator, car);
             }
+
+            removeFromLine(car);
+        }
+    }
+
+    private void removeFromLine(Car car) {
+        Point2D center1 = new Point2D(CENTER, CENTER);
+        Point2D center2 = new Point2D(car.getX() + car.getWidth() / 2, car.getY() + car.getWidth() / 2);
+        double dis = center1.distance(center2);
+        if (dis < 63.245) {
+            System.out.println("remove");
+            lengthCars.merge(car.direction, -1, Integer::sum);
+        } else {
+            System.out.println("no");
         }
     }
 
@@ -219,7 +233,7 @@ public class App extends Application {
     private void removeCar(Pane pane, Iterator<Car> iterator, Car car) {
         iterator.remove();
         pane.getChildren().remove(car);
-        lengthCars.merge(car.direction, -1, Integer::sum);
+        // lengthCars.merge(car.direction, -1, Integer::sum);
     }
 
     private void setupScene(Stage stage, Pane pane, AnimationTimer timer, Map<KeyCode, Point2D> positions) {
@@ -283,9 +297,9 @@ public class App extends Application {
             changeDirection(car, KeyCode.RIGHT);
         } else if (car.getFill().equals(Color.PURPLE) && car.getY() <= CENTER - CAR_WIDTH) {
             changeDirection(car, KeyCode.LEFT);
-        } 
+        }
         // else if (car.getFill().equals(Color.BLUE) && car.getY() <= CENTER) {
-            // lengthCars.merge(car.direction, -1, Integer::sum);
+        // lengthCars.merge(car.direction, -1, Integer::sum);
         // }
     }
 
@@ -294,9 +308,10 @@ public class App extends Application {
             changeDirection(car, KeyCode.LEFT);
         } else if (car.getFill().equals(Color.PURPLE) && car.getY() >= CENTER) {
             changeDirection(car, KeyCode.RIGHT);
-        }  
-        // else if (car.getFill().equals(Color.BLUE) && car.getY() >= CENTER - CAR_WIDTH) {
-        //     lengthCars.merge(car.direction, -1, Integer::sum);
+        }
+        // else if (car.getFill().equals(Color.BLUE) && car.getY() >= CENTER -
+        // CAR_WIDTH) {
+        // lengthCars.merge(car.direction, -1, Integer::sum);
         // }
     }
 
@@ -307,7 +322,7 @@ public class App extends Application {
             changeDirection(car, KeyCode.DOWN);
         }
         // else if (car.getFill().equals(Color.BLUE) && car.getY() <= CENTER) {
-        //     lengthCars.merge(car.direction, -1, Integer::sum);
+        // lengthCars.merge(car.direction, -1, Integer::sum);
         // }
     }
 
@@ -317,13 +332,14 @@ public class App extends Application {
         } else if (car.getFill().equals(Color.PURPLE) && car.getX() >= CENTER) {
             changeDirection(car, KeyCode.UP);
         }
-        // else if (car.getFill().equals(Color.BLUE) && car.getX() >= CENTER - CAR_WIDTH) {
-            // lengthCars.merge(car.direction, -1, Integer::sum);
+        // else if (car.getFill().equals(Color.BLUE) && car.getX() >= CENTER -
+        // CAR_WIDTH) {
+        // lengthCars.merge(car.direction, -1, Integer::sum);
         // }
     }
 
     private void changeDirection(Car car, KeyCode newDirection) {
-        lengthCars.merge(car.direction, -1, Integer::sum);
+        // lengthCars.merge(car.direction, -1, Integer::sum);
         // lengthCars.merge(newDirection, 1, Integer::sum);
         car.setDirection(newDirection);
     }
@@ -340,4 +356,3 @@ public class App extends Application {
         launch();
     }
 }
-
