@@ -122,6 +122,7 @@ public class App extends Application {
         Optional<Entry<KeyCode, List<Car>>> maxEntry = lengthCars.entrySet()
                 .stream()
                 .max(Comparator.comparingInt(e -> e.getValue().size()));
+        System.out.println(maxEntry.get().getKey());
 
         if (maxEntry.isPresent()) {
             // Switch lights
@@ -161,7 +162,7 @@ public class App extends Application {
         if (dis < 63.245) {
             List<Car> list = lengthCars.get(car.direction);
             list.remove(car);
-        } else {
+            // System.out.println(a);
         }
     }
 
@@ -175,7 +176,8 @@ public class App extends Application {
 
                 // Car can move if: already passed OR (not red light OR not near intersection)
                 if (hasPassed || !isRedLight || !isNearIntersection) {
-                    if (hasPassed || isSafeDistance(car, prevCarXandY.get(car.direction))) {
+                    System.out.println(prevCarXandY.get(car.direction));
+                    if (hasPassed || isSafeDistance(car, lengthCars.get(car.direction))) {
                         car.setY(car.getY() - SPEED);
                         if (isNearIntersection && !hasPassed) {
                             car.setPassed();
@@ -193,7 +195,8 @@ public class App extends Application {
                 boolean hasPassed = car.getPassed();
 
                 if (hasPassed || !isRedLight || !isNearIntersection) {
-                    if (hasPassed || isSafeDistance(car, prevCarXandY.get(car.direction))) {
+                    System.out.println(prevCarXandY.get(car.direction));
+                    if (hasPassed || isSafeDistance(car, lengthCars.get(car.direction))) {
                         car.setY(car.getY() + SPEED);
                         if (isNearIntersection && !hasPassed) {
                             car.setPassed();
@@ -211,7 +214,8 @@ public class App extends Application {
                 boolean hasPassed = car.getPassed();
 
                 if (hasPassed || !isRedLight || !isNearIntersection) {
-                    if (hasPassed || isSafeDistance(car, prevCarXandY.get(car.direction))) {
+                    System.out.println(prevCarXandY.get(car.direction));
+                    if (hasPassed || isSafeDistance(car, lengthCars.get(car.direction))) {
                         car.setX(car.getX() - SPEED);
                         if (isNearIntersection && !hasPassed) {
                             car.setPassed();
@@ -229,7 +233,8 @@ public class App extends Application {
                 boolean hasPassed = car.getPassed();
 
                 if (hasPassed || !isRedLight || !isNearIntersection) {
-                    if (hasPassed || isSafeDistance(car, prevCarXandY.get(car.direction))) {
+                    System.out.println(prevCarXandY.get(car.direction));
+                    if (hasPassed || isSafeDistance(car, lengthCars.get(car.direction))) {
                         car.setX(car.getX() + SPEED);
                         if (isNearIntersection && !hasPassed) {
                             car.setPassed();
@@ -363,11 +368,33 @@ public class App extends Application {
     }
 
     // Helper method
-    private boolean isSafeDistance(Car currentCar, Car previousCar) {
-        if (previousCar == null || previousCar.equals(currentCar)) {
-            return true;
+    private boolean isSafeDistance(Car currentCar, List<Car> cars) {
+        for (Car other : cars) {
+            if (other == currentCar)
+                continue; // skip itself
+
+            switch (currentCar.direction) {
+                case UP, DOWN -> {
+                    // Same column (X aligned)
+                    if (Math.abs(currentCar.getX() - other.getX()) < Car.WIDTH / 2) {
+                        // Check vertical distance
+                        if (Math.abs(currentCar.getY() - other.getY()) < SAFETY_GAP + Car.HEIGHT) {
+                            return false; // too close
+                        }
+                    }
+                }
+                case LEFT, RIGHT -> {
+                    // Same row (Y aligned)
+                    if (Math.abs(currentCar.getY() - other.getY()) < Car.HEIGHT / 2) {
+                        // Check horizontal distance
+                        if (Math.abs(currentCar.getX() - other.getX()) < SAFETY_GAP + Car.WIDTH) {
+                            return false; // too close
+                        }
+                    }
+                }
+            }
         }
-        return previousCar.distance(currentCar.getX(), currentCar.getY()) >= SAFETY_GAP + CAR_WIDTH;
+        return true; // no collisions, safe
     }
 
     public static void main(String[] args) {
