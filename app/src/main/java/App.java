@@ -30,7 +30,7 @@ public class App extends Application {
     private static final double SAFETY_GAP = 40;
     private static final double SPEED = 0.25;
     private long lastLightChangeTime = 0;
-    private long greenDuration = 3_000_000_000L; // default 3 seconds in nanoseconds
+    private long greenDuration = 1_000_000_000L; // default 3 seconds in nanoseconds
 
     private final List<Car> cars = new ArrayList<>();
     private final Map<KeyCode, List<Car>> lengthCars = new EnumMap<>(KeyCode.class);
@@ -116,16 +116,15 @@ public class App extends Application {
 
         KeyCode currentGreenDirection = getDirectionFromLight(lastGreen);
         List<Car> currentRoadCars = lengthCars.get(currentGreenDirection);
-
-        // // If current green road is empty, don't switch lights
-
-        // If still within current green duration, do nothing
+        
         if (now - lastLightChangeTime < greenDuration) {
             return;
         }
         // Find the road with the max queue
         Optional<Entry<KeyCode, List<Car>>> maxEntry = lengthCars.entrySet()
                 .stream()
+                // Skip the current green direction
+                .filter(e -> !getDirectionFromLight(lastGreen).equals(e.getKey()))
                 .max(Comparator.comparingInt(e -> e.getValue().size()));
 
         if (maxEntry.isPresent()) {
