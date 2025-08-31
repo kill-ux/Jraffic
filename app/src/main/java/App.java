@@ -28,7 +28,7 @@ public class App extends Application {
     private static final double CENTER = WINDOW_SIZE / 2;
     private static final double CAR_WIDTH = 40;
     private static final double SAFETY_GAP = 40;
-    private static final double SPEED = 0.1;
+    private static final double SPEED = 0.25;
     private static final double STOPPING_DISTANCE = 80;
     private long lastLightChangeTime = 0;
     private long greenDuration = 3_000_000_000L; // default 3 seconds in nanoseconds
