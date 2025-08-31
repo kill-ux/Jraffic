@@ -108,9 +108,6 @@ public class App extends Application {
         switch (car.direction) {
             case UP -> {
                 Light light = lights.get(2);
-                Car lastCar = lastCarXandY.get(KeyCode.UP);
-
-                // Check if car should stop at red light
                 boolean isRedLight = light.getStroke().equals(Color.RED);
                 boolean isNearIntersection = car.getY() <= light.getY();
 
@@ -123,9 +120,50 @@ public class App extends Application {
                     prevCarXandY.put(KeyCode.UP, car);
                 }
             }
-            case DOWN -> car.setY(car.getY() + SPEED);
-            case LEFT -> car.setX(car.getX() - SPEED);
-            case RIGHT -> car.setX(car.getX() + SPEED);
+            case DOWN -> {
+                Light light = lights.get(0);
+                boolean isRedLight = light.getStroke().equals(Color.RED);
+                boolean isNearIntersection = car.getY() >= light.getY();
+
+                if (!(isRedLight && isNearIntersection)) {
+                    if (isSafeDistance(car, prevCarXandY.get(car.direction))) {
+                        car.setY(car.getY() + SPEED);
+                    }
+                    prevCarXandY.put(KeyCode.DOWN, car);
+                } else {
+                    prevCarXandY.put(KeyCode.DOWN, car);
+                }
+            }
+            case LEFT -> {
+
+                Light light = lights.get(1);
+                boolean isRedLight = light.getStroke().equals(Color.RED);
+                boolean isNearIntersection = car.getX() <= light.getX();
+
+                if (!(isRedLight && isNearIntersection)) {
+                    if (isSafeDistance(car, prevCarXandY.get(car.direction))) {
+                        car.setX(car.getX() - SPEED);
+                    }
+                    prevCarXandY.put(KeyCode.LEFT, car);
+                } else {
+                    prevCarXandY.put(KeyCode.LEFT, car);
+                }
+
+            }
+            case RIGHT -> {
+                Light light = lights.get(3);
+                boolean isRedLight = light.getStroke().equals(Color.RED);
+                boolean isNearIntersection = car.getX() >= light.getX();
+
+                if (!(isRedLight && isNearIntersection)) {
+                    if (isSafeDistance(car, prevCarXandY.get(car.direction))) {
+                        car.setX(car.getX() + SPEED);
+                    }
+                    prevCarXandY.put(KeyCode.RIGHT, car);
+                } else {
+                    prevCarXandY.put(KeyCode.RIGHT, car);
+                }
+            }
         }
     }
 
