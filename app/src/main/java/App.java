@@ -29,7 +29,6 @@ public class App extends Application {
     private static final double CAR_WIDTH = 40;
     private static final double SAFETY_GAP = 40;
     private static final double SPEED = 0.25;
-    private static final double STOPPING_DISTANCE = 80;
     private long lastLightChangeTime = 0;
     private long greenDuration = 3_000_000_000L; // default 3 seconds in nanoseconds
 
@@ -114,6 +113,12 @@ public class App extends Application {
     }
 
     private void fireLights(long now) {
+
+        KeyCode currentGreenDirection = getDirectionFromLight(lastGreen);
+        List<Car> currentRoadCars = lengthCars.get(currentGreenDirection);
+
+        // // If current green road is empty, don't switch lights
+
         // If still within current green duration, do nothing
         if (now - lastLightChangeTime < greenDuration) {
             return;
@@ -136,6 +141,18 @@ public class App extends Application {
             // Reset timer
             lastLightChangeTime = now;
         }
+    }
+
+    // Helper method to get direction from light
+    private KeyCode getDirectionFromLight(Light light) {
+        int lightIndex = lights.indexOf(light);
+        return switch (lightIndex) {
+            case 0 -> KeyCode.DOWN; // Light at (CENTER-80, CENTER-80)
+            case 1 -> KeyCode.LEFT; // Light at (CENTER+40, CENTER-80)
+            case 2 -> KeyCode.UP; // Light at (CENTER+40, CENTER+40)
+            case 3 -> KeyCode.RIGHT; // Light at (CENTER-80, CENTER+40)
+            default -> KeyCode.UP;
+        };
     }
 
     private void updateCars(Pane pane) {
@@ -320,9 +337,6 @@ public class App extends Application {
         } else if (car.getFill().equals(Color.PURPLE) && car.getY() <= CENTER - CAR_WIDTH) {
             changeDirection(car, KeyCode.LEFT);
         }
-        // else if (car.getFill().equals(Color.BLUE) && car.getY() <= CENTER) {
-        // lengthCars.merge(car.direction, -1, Integer::sum);
-        // }
     }
 
     private void handleDownDirection(Car car) {
@@ -331,10 +345,6 @@ public class App extends Application {
         } else if (car.getFill().equals(Color.PURPLE) && car.getY() >= CENTER) {
             changeDirection(car, KeyCode.RIGHT);
         }
-        // else if (car.getFill().equals(Color.BLUE) && car.getY() >= CENTER -
-        // CAR_WIDTH) {
-        // lengthCars.merge(car.direction, -1, Integer::sum);
-        // }
     }
 
     private void handleLeftDirection(Car car) {
@@ -343,9 +353,6 @@ public class App extends Application {
         } else if (car.getFill().equals(Color.PURPLE) && car.getX() <= CENTER - CAR_WIDTH) {
             changeDirection(car, KeyCode.DOWN);
         }
-        // else if (car.getFill().equals(Color.BLUE) && car.getY() <= CENTER) {
-        // lengthCars.merge(car.direction, -1, Integer::sum);
-        // }
     }
 
     private void handleRightDirection(Car car) {
@@ -354,20 +361,14 @@ public class App extends Application {
         } else if (car.getFill().equals(Color.PURPLE) && car.getX() >= CENTER) {
             changeDirection(car, KeyCode.UP);
         }
-        // else if (car.getFill().equals(Color.BLUE) && car.getX() >= CENTER -
-        // CAR_WIDTH) {
-        // lengthCars.merge(car.direction, -1, Integer::sum);
-        // }
     }
 
     private void changeDirection(Car car, KeyCode newDirection) {
-        // lengthCars.merge(car.direction, -1, Integer::sum);
-        // lengthCars.merge(newDirection, 1, Integer::sum);
         car.setDirection(newDirection);
     }
 
     // Helper method
-    private boolean isSafeDistance(Car currentCar, List<Car> cars, double x,double y) {
+    private boolean isSafeDistance(Car currentCar, List<Car> cars, double x, double y) {
         for (Car other : cars) {
             if (other == currentCar)
                 continue;
@@ -375,7 +376,6 @@ public class App extends Application {
             switch (currentCar.direction) {
                 case UP -> {
                     if (Math.abs(x - other.getX()) < Car.WIDTH / 2) {
-                        // Check if other car is ahead (has smaller Y) and too close
                         if (other.getY() < y && y - other.getY() < SAFETY_GAP + Car.HEIGHT) {
                             return false;
                         }
@@ -383,7 +383,6 @@ public class App extends Application {
                 }
                 case DOWN -> {
                     if (Math.abs(x - other.getX()) < Car.WIDTH / 2) {
-                        // Check if other car is ahead (has larger Y) and too close
                         if (other.getY() > y && other.getY() - y < SAFETY_GAP + Car.HEIGHT) {
                             return false;
                         }
@@ -391,16 +390,13 @@ public class App extends Application {
                 }
                 case LEFT -> {
                     if (Math.abs(y - other.getY()) < Car.HEIGHT / 2) {
-                        // Check if other car is ahead (has smaller X) and too close
                         if (other.getX() < x && x - other.getX() < SAFETY_GAP + Car.WIDTH) {
-                            System.out.println("ffffffffffffffffff");
                             return false;
                         }
                     }
                 }
                 case RIGHT -> {
                     if (Math.abs(y - other.getY()) < Car.HEIGHT / 2) {
-                        // Check if other car is ahead (has larger X) and too close
                         if (other.getX() > x && other.getX() - x < SAFETY_GAP + Car.WIDTH) {
                             return false;
                         }
