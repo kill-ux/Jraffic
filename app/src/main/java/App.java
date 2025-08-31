@@ -171,6 +171,10 @@ public class App extends Application {
         }
     }
 
+    private void exit() {
+        System.exit(0);
+    }
+
     private void removeFromLine(Car car) {
         Point2D center1 = new Point2D(CENTER, CENTER);
         Point2D center2 = new Point2D(car.getX() + car.getWidth() / 2, car.getY() + car.getWidth() / 2);
@@ -291,6 +295,8 @@ public class App extends Application {
             KeyCode key = event.getCode();
             if (positions.containsKey(key)) {
                 addCarIfPossible(pane, key, positions.get(key));
+            } else if (key == KeyCode.ESCAPE) {
+                exit();
             }
         });
     }
