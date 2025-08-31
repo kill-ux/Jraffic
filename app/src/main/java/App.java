@@ -26,10 +26,12 @@ public class App extends Application {
     private static final double CAR_WIDTH = 40;
     private static final double SAFETY_GAP = 40;
     private static final double SPEED = 0.1;
+    private static final double STOPPING_DISTANCE = 80;
 
     private final List<Car> cars = new ArrayList<>();
     private final Map<KeyCode, Integer> lengthCars = new EnumMap<>(KeyCode.class);
     private final Map<KeyCode, Car> lastCarXandY = new EnumMap<>(KeyCode.class);
+    private final Map<KeyCode, Car> prevCarXandY = new EnumMap<>(KeyCode.class);
     private final Color[] carColors = { Color.YELLOW, Color.PURPLE, Color.BLUE };
     private final List<Light> lights = new ArrayList<>();
 
@@ -105,16 +107,21 @@ public class App extends Application {
     private void moveCar(Car car) {
         switch (car.direction) {
             case UP -> {
-                // verfiy ligths
                 Light light = lights.get(2);
-                Car lastCar = lastCarXandY.get(car.direction);
-                // if (!(light.getStroke().equals(Color.RED) && (light.getY() >= car.getY()))) {
-                //     if (!lastCar.equals(car) || lastCar.distance(car.getX(), car.getY()) >= SAFETY_GAP + CAR_WIDTH) {
-                        
-                //     }
-                    car.setY(car.getY() - SPEED);
-                // }
+                Car lastCar = lastCarXandY.get(KeyCode.UP);
 
+                // Check if car should stop at red light
+                boolean isRedLight = light.getStroke().equals(Color.RED);
+                boolean isNearIntersection = car.getY() <= light.getY();
+
+                if (!(isRedLight && isNearIntersection)) {
+                    if (isSafeDistance(car, prevCarXandY.get(car.direction))) {
+                        car.setY(car.getY() - SPEED);
+                    }
+                    prevCarXandY.put(KeyCode.UP, car);
+                } else {
+                    prevCarXandY.put(KeyCode.UP, car);
+                }
             }
             case DOWN -> car.setY(car.getY() + SPEED);
             case LEFT -> car.setX(car.getX() - SPEED);
@@ -225,6 +232,15 @@ public class App extends Application {
         lengthCars.merge(car.direction, -1, Integer::sum);
         lengthCars.merge(newDirection, 1, Integer::sum);
         car.setDirection(newDirection);
+    }
+
+    // Helper method
+    private boolean isSafeDistance(Car currentCar, Car previousCar) {
+        if (previousCar == null || previousCar.equals(currentCar)) {
+            return true;
+        }
+        System.out.println(previousCar.distance(currentCar.getX(), currentCar.getY()));
+        return previousCar.distance(currentCar.getX(), currentCar.getY()) >= SAFETY_GAP + CAR_WIDTH;
     }
 
     public static void main(String[] args) {
