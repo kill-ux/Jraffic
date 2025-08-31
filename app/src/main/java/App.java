@@ -1,11 +1,12 @@
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javafx.animation.AnimationTimer;
@@ -29,9 +30,11 @@ public class App extends Application {
     private static final double SAFETY_GAP = 40;
     private static final double SPEED = 0.1;
     private static final double STOPPING_DISTANCE = 80;
+    private long lastLightChangeTime = 0;
+    private long greenDuration = 3_000_000_000L; // default 3 seconds in nanoseconds
 
     private final List<Car> cars = new ArrayList<>();
-    private final Map<KeyCode, Integer> lengthCars = new EnumMap<>(KeyCode.class);
+    private final Map<KeyCode, List<Car>> lengthCars = new EnumMap<>(KeyCode.class);
     private final Map<KeyCode, Car> lastCarXandY = new EnumMap<>(KeyCode.class);
     private final Map<KeyCode, Car> prevCarXandY = new EnumMap<>(KeyCode.class);
     private final Color[] carColors = { Color.YELLOW, Color.PURPLE, Color.BLUE };
@@ -55,6 +58,13 @@ public class App extends Application {
         lights.addAll(List.of(new Light(CENTER - 80, CENTER - 80), new Light(CENTER + 40, CENTER - 80),
                 new Light(CENTER + 40, CENTER + 40),
                 new Light(CENTER - 80, CENTER + 40)));
+        lengthCars.putAll(Map.of(
+                KeyCode.UP, new ArrayList<>(),
+                KeyCode.DOWN, new ArrayList<>(),
+                KeyCode.LEFT, new ArrayList<>(),
+                KeyCode.RIGHT, new ArrayList<>()
+
+        ));
 
         lastGreen = lights.get(0);
 
@@ -97,22 +107,35 @@ public class App extends Application {
         return new AnimationTimer() {
             @Override
             public void handle(long now) {
-                fireLights();
+                fireLights(now);
                 updateCars(pane);
             }
         };
     }
 
-    private void fireLights() {
-        Optional<Entry<KeyCode, Integer>> maxEntry = lengthCars.entrySet()
+    private void fireLights(long now) {
+        // If still within current green duration, do nothing
+        if (now - lastLightChangeTime < greenDuration) {
+            return;
+        }
+        // Find the road with the max queue
+        Optional<Entry<KeyCode, List<Car>>> maxEntry = lengthCars.entrySet()
                 .stream()
-                .max(Map.Entry.comparingByValue());
+                .max(Comparator.comparingInt(e -> e.getValue().size()));
+        System.out.println(maxEntry.get().getKey());
 
         if (maxEntry.isPresent()) {
+            // Switch lights
             lastGreen.setStroke(Color.RED);
             Light nextGreen = lights.get(Index(maxEntry.get().getKey()));
             nextGreen.setStroke(Color.GREEN);
             lastGreen = nextGreen;
+            // Adjust duration proportional to number of cars
+            int queueSize = maxEntry.get().getValue().size();
+            // e.g. base 3 seconds + 1 second per car
+            greenDuration = (3 + queueSize) * 1_000_000_000L;
+            // Reset timer
+            lastLightChangeTime = now;
         }
     }
 
@@ -124,13 +147,10 @@ public class App extends Application {
             if (!car.changed) {
                 rotateCar(car);
             }
-
             moveCar(car);
-
             if (isCarOutOfBounds(car)) {
                 removeCar(pane, iterator, car);
             }
-
             removeFromLine(car);
         }
     }
@@ -140,10 +160,9 @@ public class App extends Application {
         Point2D center2 = new Point2D(car.getX() + car.getWidth() / 2, car.getY() + car.getWidth() / 2);
         double dis = center1.distance(center2);
         if (dis < 63.245) {
-            System.out.println("remove");
-            lengthCars.merge(car.direction, -1, Integer::sum);
-        } else {
-            System.out.println("no");
+            List<Car> list = lengthCars.get(car.direction);
+            list.remove(car);
+            // System.out.println(a);
         }
     }
 
@@ -157,7 +176,8 @@ public class App extends Application {
 
                 // Car can move if: already passed OR (not red light OR not near intersection)
                 if (hasPassed || !isRedLight || !isNearIntersection) {
-                    if (hasPassed || isSafeDistance(car, prevCarXandY.get(car.direction))) {
+                    System.out.println(prevCarXandY.get(car.direction));
+                    if (hasPassed || isSafeDistance(car, lengthCars.get(car.direction))) {
                         car.setY(car.getY() - SPEED);
                         if (isNearIntersection && !hasPassed) {
                             car.setPassed();
@@ -175,7 +195,8 @@ public class App extends Application {
                 boolean hasPassed = car.getPassed();
 
                 if (hasPassed || !isRedLight || !isNearIntersection) {
-                    if (hasPassed || isSafeDistance(car, prevCarXandY.get(car.direction))) {
+                    System.out.println(prevCarXandY.get(car.direction));
+                    if (hasPassed || isSafeDistance(car, lengthCars.get(car.direction))) {
                         car.setY(car.getY() + SPEED);
                         if (isNearIntersection && !hasPassed) {
                             car.setPassed();
@@ -193,7 +214,8 @@ public class App extends Application {
                 boolean hasPassed = car.getPassed();
 
                 if (hasPassed || !isRedLight || !isNearIntersection) {
-                    if (hasPassed || isSafeDistance(car, prevCarXandY.get(car.direction))) {
+                    System.out.println(prevCarXandY.get(car.direction));
+                    if (hasPassed || isSafeDistance(car, lengthCars.get(car.direction))) {
                         car.setX(car.getX() - SPEED);
                         if (isNearIntersection && !hasPassed) {
                             car.setPassed();
@@ -211,7 +233,8 @@ public class App extends Application {
                 boolean hasPassed = car.getPassed();
 
                 if (hasPassed || !isRedLight || !isNearIntersection) {
-                    if (hasPassed || isSafeDistance(car, prevCarXandY.get(car.direction))) {
+                    System.out.println(prevCarXandY.get(car.direction));
+                    if (hasPassed || isSafeDistance(car, lengthCars.get(car.direction))) {
                         car.setX(car.getX() + SPEED);
                         if (isNearIntersection && !hasPassed) {
                             car.setPassed();
@@ -233,7 +256,6 @@ public class App extends Application {
     private void removeCar(Pane pane, Iterator<Car> iterator, Car car) {
         iterator.remove();
         pane.getChildren().remove(car);
-        // lengthCars.merge(car.direction, -1, Integer::sum);
     }
 
     private void setupScene(Stage stage, Pane pane, AnimationTimer timer, Map<KeyCode, Point2D> positions) {
@@ -259,7 +281,7 @@ public class App extends Application {
 
     private void addCarIfPossible(Pane pane, KeyCode direction, Point2D position) {
         double capacity = Math.floor(WINDOW_SIZE / (CAR_WIDTH + SAFETY_GAP));
-        if (lengthCars.getOrDefault(direction, 0) < capacity / 2) {
+        if (lengthCars.get(direction).size() < capacity / 2) {
             Car lastCar = lastCarXandY.get(direction);
 
             if (lastCar == null || lastCar.distance(position.getX(), position.getY()) >= SAFETY_GAP + CAR_WIDTH) {
@@ -275,7 +297,8 @@ public class App extends Application {
 
         pane.getChildren().add(car);
         cars.add(car);
-        lengthCars.merge(direction, 1, Integer::sum);
+        List<Car> list = lengthCars.get(direction);
+        list.add(car);
         lastCarXandY.put(direction, car);
     }
 
@@ -345,11 +368,33 @@ public class App extends Application {
     }
 
     // Helper method
-    private boolean isSafeDistance(Car currentCar, Car previousCar) {
-        if (previousCar == null || previousCar.equals(currentCar)) {
-            return true;
+    private boolean isSafeDistance(Car currentCar, List<Car> cars) {
+        for (Car other : cars) {
+            if (other == currentCar)
+                continue; // skip itself
+
+            switch (currentCar.direction) {
+                case UP, DOWN -> {
+                    // Same column (X aligned)
+                    if (Math.abs(currentCar.getX() - other.getX()) < Car.WIDTH / 2) {
+                        // Check vertical distance
+                        if (Math.abs(currentCar.getY() - other.getY()) < SAFETY_GAP + Car.HEIGHT) {
+                            return false; // too close
+                        }
+                    }
+                }
+                case LEFT, RIGHT -> {
+                    // Same row (Y aligned)
+                    if (Math.abs(currentCar.getY() - other.getY()) < Car.HEIGHT / 2) {
+                        // Check horizontal distance
+                        if (Math.abs(currentCar.getX() - other.getX()) < SAFETY_GAP + Car.WIDTH) {
+                            return false; // too close
+                        }
+                    }
+                }
+            }
         }
-        return previousCar.distance(currentCar.getX(), currentCar.getY()) >= SAFETY_GAP + CAR_WIDTH;
+        return true; // no collisions, safe
     }
 
     public static void main(String[] args) {
